@@ -1,0 +1,6 @@
+mender-artifact write module-image \
+  --type node-red-update \
+  --artifact-name nodered-update-4.1.8 \
+  --device-type firefly \
+  --output-path nodered-update-4.1.8.mender \
+  --file version.txt
