@@ -8,11 +8,11 @@ from datetime import datetime
 
 import paho.mqtt.client as mqtt
 
-MQTT_HOST     = "selin.solu.co.id"
+MQTT_HOST     = "your-mqtt-server"
 MQTT_PORT     = 9099
-MQTT_USERNAME = "selin_dev"
-MQTT_PASSWORD = "VA!#J*O[MUhNCV7T"
-DEVICE_ID     = "a6ca0510-4771-11f1-a741-2323891940a8"
+MQTT_USERNAME = "username"
+MQTT_PASSWORD = "password"
+DEVICE_ID     = "your-device-token"
 INTERVAL_SEC  = 30
 
 SITE_REGION   = "JAW"
