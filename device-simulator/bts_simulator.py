@@ -1,23 +1,3 @@
-"""
-BTS Monitoring Device Simulator for ThingsBoard
-================================================
-Kategori: overview, battery, rectifier, inverter, general_data, events,
-          grounding, presence, temperature, cctv, fiber_optic
-
-Format payload (1 ts bersama per kategori):
-{
-  "ts": 1777882102,
-  "values": {
-    "Usys":  {"value": "48.30", "unit": "V"},
-    "Iload": {"value": "55.00", "unit": "A"},
-    ...
-  }
-}
-
-Interval: 30 detik
-Topic   : bts/{region}/{site_code}/{site_name}/{category}
-"""
-
 import base64
 import json
 import math
@@ -28,9 +8,6 @@ from datetime import datetime
 
 import paho.mqtt.client as mqtt
 
-# ─────────────────────────────────────────────
-#  KONFIGURASI
-# ─────────────────────────────────────────────
 MQTT_HOST     = "selin.solu.co.id"
 MQTT_PORT     = 9099
 MQTT_USERNAME = "selin_dev"
@@ -45,9 +22,6 @@ SITE_NAME     = "Jagakarsa"
 def make_topic(category: str) -> str:
     return f"bts/{SITE_REGION}/{SITE_CODE}/{SITE_NAME}/{category}"
 
-# ─────────────────────────────────────────────
-#  LOGGING
-# ─────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -55,9 +29,6 @@ logging.basicConfig(
 )
 log = logging.getLogger("BTS-Simulator")
 
-# ─────────────────────────────────────────────
-#  UNIT MAP
-# ─────────────────────────────────────────────
 UNIT_MAP = {
     # Overview
     "Usys":"V","Iload":"A","Psys":"W","Eload":"kWh","Irect":"A","Prect":"W",
@@ -132,9 +103,6 @@ def get_unit(key: str) -> str:
             return UNIT_MAP[suffix]
     return ""
 
-# ─────────────────────────────────────────────
-#  HELPERS
-# ─────────────────────────────────────────────
 _tick = 0
 
 def rnd(lo, hi, decimals=2):
@@ -152,16 +120,6 @@ def fmtval(value) -> str:
     return str(value)
 
 def build_payload(raw: dict) -> dict:
-    """
-    Bungkus semua key dengan 1 ts bersama:
-    {
-      "ts": unix_seconds,
-      "values": {
-        "key": {"value": "...", "unit": "..."},
-        ...
-      }
-    }
-    """
     ts_now = int(time.time())
     values = {}
     for k, v in raw.items():
@@ -169,7 +127,6 @@ def build_payload(raw: dict) -> dict:
     return {"ts": ts_now, "values": values}
 
 def build_payload_with_attrs(telemetry: dict, attributes: dict) -> dict:
-    """Untuk fiber optic — pisah telemetry dan attributes dalam 1 payload."""
     ts_now = int(time.time())
     tel_values = {}
     for k, v in telemetry.items():
@@ -180,9 +137,6 @@ def build_payload_with_attrs(telemetry: dict, attributes: dict) -> dict:
         "attributes": attributes,
     }
 
-# ─────────────────────────────────────────────
-#  GENERATORS
-# ─────────────────────────────────────────────
 
 def gen_overview():
     usys = sine_drift(48.2, 0.8); iload = sine_drift(55.0, 10.0)
@@ -421,10 +375,6 @@ def gen_fiber_optic():
     return build_payload_with_attrs(telemetry, attributes)
 
 
-# ─────────────────────────────────────────────
-#  MQTT CALLBACKS
-# ─────────────────────────────────────────────
-
 def on_connect(client, userdata, flags, rc):
     codes = {0:"Connected OK",1:"Bad protocol",2:"ID rejected",
              3:"Server unavailable",4:"Bad credentials",5:"Not authorized"}
@@ -441,9 +391,6 @@ def on_publish(client, userdata, mid):
     log.debug(f"Published mid={mid}")
 
 
-# ─────────────────────────────────────────────
-#  PUBLISH
-# ─────────────────────────────────────────────
 
 def publish_category(client, category: str, payload: dict):
     topic  = make_topic(category)
@@ -456,9 +403,6 @@ def publish_category(client, category: str, payload: dict):
         log.error(f"  [{category:14s}] FAILED rc={result.rc}")
 
 
-# ─────────────────────────────────────────────
-#  MAIN
-# ─────────────────────────────────────────────
 
 def main():
     global _tick
