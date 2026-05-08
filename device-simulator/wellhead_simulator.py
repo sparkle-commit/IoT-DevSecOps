@@ -1,23 +1,3 @@
-"""
-Well Monitoring Device Simulator for ThingsBoard
-=================================================
-Device  : 001
-Usecase : Well Monitoring (PIT, Gateway, AP, Repeater, Starlink, GX Solar)
-
-Format payload (1 ts untuk semua data):
-{
-  "ts": unix_seconds,
-  "values": {
-    "Batt":             {"value": "120",      "unit": "day"},
-    "ConnectionStatus": {"value": "CONNECT",  "unit": ""},
-    ...
-  }
-}
-
-Topic: well/001
-Interval: 30 detik
-"""
-
 import json
 import math
 import random
@@ -27,9 +7,6 @@ from datetime import datetime
 
 import paho.mqtt.client as mqtt
 
-# ─────────────────────────────────────────────
-#  KONFIGURASI
-# ─────────────────────────────────────────────
 MQTT_HOST     = "selin.solu.co.id"
 MQTT_PORT     = 9099
 MQTT_USERNAME = "selin_dev"
@@ -42,9 +19,6 @@ SITE_CODE     = "GW"
 DEVICE_NAME   = "001"
 MQTT_TOPIC    = f"well/{REGION}/{SITE_CODE}/{DEVICE_NAME}"
 
-# ─────────────────────────────────────────────
-#  LOGGING
-# ─────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -52,9 +26,6 @@ logging.basicConfig(
 )
 log = logging.getLogger("WellSim")
 
-# ─────────────────────────────────────────────
-#  UNIT MAP
-# ─────────────────────────────────────────────
 UNIT_MAP = {
     # PIT — 4 sensor
     "PressureValue1": "barg", "PressureValue2": "barg",
@@ -84,9 +55,6 @@ UNIT_MAP = {
     "LowBattAlarm":      "",
 }
 
-# ─────────────────────────────────────────────
-#  HELPERS
-# ─────────────────────────────────────────────
 _tick = 0
 
 def rnd(lo, hi, decimals=2):
@@ -119,9 +87,6 @@ def build_payload(raw: dict) -> dict:
         values[k] = {"value": fmtval(v), "unit": unit}
     return {"ts": ts_now, "values": values}
 
-# ─────────────────────────────────────────────
-#  GENERATOR — SEMUA DATA DALAM 1 PAYLOAD
-# ─────────────────────────────────────────────
 
 def gen_all():
     # ── PIT — 4 sensor ──
@@ -193,10 +158,6 @@ def gen_all():
     return build_payload(raw)
 
 
-# ─────────────────────────────────────────────
-#  MQTT CALLBACKS
-# ─────────────────────────────────────────────
-
 def on_connect(client, userdata, flags, rc):
     codes = {0:"Connected OK", 1:"Bad protocol", 2:"ID rejected",
              3:"Server unavailable", 4:"Bad credentials", 5:"Not authorized"}
@@ -213,10 +174,6 @@ def on_disconnect(client, userdata, rc):
 def on_publish(client, userdata, mid):
     log.debug(f"Published mid={mid}")
 
-
-# ─────────────────────────────────────────────
-#  MAIN
-# ─────────────────────────────────────────────
 
 def main():
     global _tick
