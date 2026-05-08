@@ -28,6 +28,7 @@ log = logging.getLogger("WellSim")
 
 UNIT_MAP = {
     # PIT — 4 sensor
+    "Batt1": "day", "Batt2": "day", "Batt3": "day", "Batt4": "day",
     "PressureValue1": "barg", "PressureValue2": "barg",
     "PressureValue3": "barg", "PressureValue4": "barg",
     "StatusDetail1":  "",     "StatusDetail2":  "",
@@ -94,7 +95,8 @@ def gen_all():
     for i in range(4):
         connected = weighted_status(0.92)
         pressure  = round(sine_drift(5.0 + i*0.3, 2.0) if connected else 0.0, 2)
-        pit.append({"connected": connected, "pressure": pressure})
+        batt      = random.randint(30, 365)
+        pit.append({"connected": connected, "pressure": pressure, "batt": batt})
 
     # ── GX Solar — tunggal ──
     soc         = max(0.0, min(100.0, sine_drift(75.0, 20.0)))
@@ -120,6 +122,7 @@ def gen_all():
 
     raw = {
         # ── PIT — 4 sensor ──
+        **{f"Batt{i+1}":             pit[i]["batt"]                               for i in range(4)},
         **{f"PressureValue{i+1}":    pit[i]["pressure"]                          for i in range(4)},
         **{f"StatusDetail{i+1}":     "GOOD" if pit[i]["connected"] else "BAD"    for i in range(4)},
         **{f"ConnectionStatus{i+1}": "CONNECT" if pit[i]["connected"] else "DISCONNECT" for i in range(4)},
@@ -173,7 +176,6 @@ def on_disconnect(client, userdata, rc):
 
 def on_publish(client, userdata, mid):
     log.debug(f"Published mid={mid}")
-
 
 
 def main():
