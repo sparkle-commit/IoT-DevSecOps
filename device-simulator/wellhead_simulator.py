@@ -11,12 +11,12 @@ MQTT_HOST     = "selin.solu.co.id"
 MQTT_PORT     = 9099
 MQTT_USERNAME = "selin_dev"
 MQTT_PASSWORD = "VA!#J*O[MUhNCV7T"
-DEVICE_ID     = "4jOqw3WyKxCdXALT0jeY"
+DEVICE_ID     = "9NzBm6GxHbbvHZCNDL0k"
 INTERVAL_SEC  = 30
 
 REGION        = "JKT"
 SITE_CODE     = "GW"
-DEVICE_NAME   = "001"
+DEVICE_NAME   = "2500-PIT-8001A"
 MQTT_TOPIC    = f"well/{REGION}/{SITE_CODE}/{DEVICE_NAME}"
 
 logging.basicConfig(
@@ -64,6 +64,7 @@ def sine_drift(base, amp, period=120):
     return round(base + amp * math.sin(2 * math.pi * _tick / period), 2)
 
 def weighted_status(on_prob=0.90):
+    """Sebagian besar ONLINE/CONNECT, sesekali OFFLINE/DISCONNECT."""
     return random.random() < on_prob
 
 def fmtval(value) -> str:
@@ -72,6 +73,13 @@ def fmtval(value) -> str:
     return str(value)
 
 def build_payload(raw: dict) -> dict:
+    """
+    Semua key dalam 1 ts bersama:
+    {
+      "ts": unix_seconds,
+      "values": { key: {"value": "...", "unit": "..."} }
+    }
+    """
     ts_now = int(time.time())
     values = {}
     for k, v in raw.items():
@@ -150,7 +158,6 @@ def gen_all():
     return build_payload(raw)
 
 
-
 def on_connect(client, userdata, flags, rc):
     codes = {0:"Connected OK", 1:"Bad protocol", 2:"ID rejected",
              3:"Server unavailable", 4:"Bad credentials", 5:"Not authorized"}
@@ -166,6 +173,7 @@ def on_disconnect(client, userdata, rc):
 
 def on_publish(client, userdata, mid):
     log.debug(f"Published mid={mid}")
+
 
 
 def main():
