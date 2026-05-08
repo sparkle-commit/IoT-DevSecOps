@@ -64,7 +64,6 @@ def sine_drift(base, amp, period=120):
     return round(base + amp * math.sin(2 * math.pi * _tick / period), 2)
 
 def weighted_status(on_prob=0.90):
-    """Sebagian besar ONLINE/CONNECT, sesekali OFFLINE/DISCONNECT."""
     return random.random() < on_prob
 
 def fmtval(value) -> str:
@@ -73,13 +72,6 @@ def fmtval(value) -> str:
     return str(value)
 
 def build_payload(raw: dict) -> dict:
-    """
-    Semua key dalam 1 ts bersama:
-    {
-      "ts": unix_seconds,
-      "values": { key: {"value": "...", "unit": "..."} }
-    }
-    """
     ts_now = int(time.time())
     values = {}
     for k, v in raw.items():
@@ -156,6 +148,7 @@ def gen_all():
     }
 
     return build_payload(raw)
+
 
 
 def on_connect(client, userdata, flags, rc):
